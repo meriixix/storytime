@@ -1,0 +1,141 @@
+.nav-text {
+    color: white;
+}
+
+.home-hero {
+    display: flex;
+    text-align: center;
+    height: 100vh;
+    align-items: center;
+}
+
+.home-hero .title {
+    font-size: 52px;
+    font-weight: 500;
+}
+
+.home-hero h1 {
+    font-size: 32px;
+    font-weight: 400;
+}
+
+.home-hero p {
+    font-size: 32px;
+}
+
+.story-card {
+    height: 345px;
+}
+
+.story-title {
+    font-size: 18px;
+}
+
+.story-image {
+    height: 160px;
+    object-fit: cover;
+}
+
+.story-desc {
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.4;
+    margin-bottom: 5px;
+}
+
+.story-footer {
+    font-size: 12px;
+}
+
+.story-footer__author, .story-footer__date, .story-desc {
+    color: #8f8f8f
+}
+
+.story-footer__category,
+.story-footer__author,
+.story-footer__date {
+    margin: 0px;
+}
+
+.story-footer__category {
+    background-color: #eee;
+    display: inline;
+    border-radius: 5px;
+    padding: 2px 5px;
+    color: black;
+    font-weight: 500;
+}
+
+.register {
+    text-align: center;
+    border: 1px solid black;
+    width: 100px;
+    margin-right: 15px;
+}
+
+.login {
+    text-align: center;
+    background-color: black;
+    width: 100px;
+}
+
+.btn-search {
+    background-color: black;
+}
+
+.navbar-nav .register a {
+    color: black !important;
+    font-weight: 500;
+}
+
+.navbar-nav .login a {
+    color: white !important;
+    font-weight: 500;
+}
+
+.form-control:focus,
+.form-select:focus {
+    box-shadow: none;
+    border-color: black;
+}
+
+.form-select {
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5'%3E%3Cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E") right 0.75rem center/8px 10px no-repeat;
+}
+
+.btn.btn-search:hover {
+    background-color: black;
+}
+
+.btn.btn-search {
+    background-color: #0e0e0e;
+}
+
+.footer {
+    text-align: center;
+    padding: 20px 0px;
+    margin-top: 100px;
+}
+
+.btn.load-more:hover {
+    background-color: white;
+    color: black
+}
+
+.btn.btn-search:focus {
+    box-shadow: none;
+}
+
+.btn.load-more:focus {
+    box-shadow: none;
+}
+
+
+.btn.load-more {
+    width: 130px;
+    font-weight: 500;
+}
