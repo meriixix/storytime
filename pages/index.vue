@@ -1,5 +1,5 @@
 <template>
-  <main class="main-wrapper container-sm">
+  <main class="main-wrapper container-sm pt-0">
     <div class="home-hero">
       <div class="container">
         <div class="title">

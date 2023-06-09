@@ -1,6 +1,12 @@
 <template>
   <div class="row gy-4">
-    <div class="col-3" v-for="story in stories" :key="story.id">
+    <nuxt-link
+      :to="`/story/${story.id}`"
+      tag="div"
+      class="col-3"
+      v-for="story in stories"
+      :key="story.id"
+    >
       <div class="story-card card shadow-sm rounded-0" style="width: 16rem">
         <img :src="setImage(story)" class="img-fluid story-image" alt="Story" />
         <div class="card-body">
@@ -17,7 +23,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </nuxt-link>
   </div>
 </template>
 
@@ -29,7 +35,7 @@ export default {
   methods: {
     getDate(arg) {
       const date = new Date(arg);
-      const newDate = date.toDateString().split(" ")
+      const newDate = date.toDateString().split(" ");
       return `${newDate[2]} ${newDate[1]} ${newDate[3]}`;
     },
     setImage(story) {

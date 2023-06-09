@@ -10,7 +10,6 @@ const createStore = () => {
         getters: {},
         mutations: {
             setStoryList(state, payload) {
-                // console.log(payload)
                 if ( state.pagination.page == 1) {
                     state.stories = []
                 } 
@@ -19,7 +18,6 @@ const createStore = () => {
                 });
             },
             setPagination(state, payload) {
-                // console.log(payload)
                 state.pagination = payload
             }
         },

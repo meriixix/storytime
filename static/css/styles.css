@@ -1,3 +1,7 @@
+.main-wrapper {
+    padding-top: 78px;
+}
+
 .nav-text {
     color: white;
 }
@@ -138,4 +142,30 @@
 .btn.load-more {
     width: 130px;
     font-weight: 500;
+}
+
+/* Detail Page */
+.detail-image {
+    margin: 20px 0px;
+    position: relative;
+}
+
+.detail-image img {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.story-aside {
+    position: sticky;
+    top: 7rem;
+}
+
+.author-avatar {
+    width: 70px;
+    height: 70px;
+}
+
+.detail-container {
+    padding-top: 22px;
 }
