@@ -7,7 +7,7 @@
       v-for="story in stories"
       :key="story.id"
     >
-      <div class="story-card card shadow-sm rounded-0" style="width: 16rem">
+      <div class="story-card card shadow-sm rounded-0">
         <img :src="setImage(story)" class="img-fluid story-image" alt="Story" />
         <div class="card-body">
           <h5 class="card-title story-title">{{ story.title }}</h5>
@@ -47,3 +47,54 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.story-card {
+  height: 345px;
+}
+
+.story-title {
+  font-size: 18px;
+}
+
+.story-image {
+  height: 160px;
+  object-fit: cover;
+}
+
+.story-desc {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.4;
+  margin-bottom: 5px;
+}
+
+.story-footer {
+  font-size: 12px;
+}
+
+.story-footer__author,
+.story-footer__date,
+.story-desc {
+  color: #8f8f8f;
+}
+
+.story-footer__category,
+.story-footer__author,
+.story-footer__date {
+  margin: 0px;
+}
+
+.story-footer__category {
+  background-color: #eee;
+  display: inline;
+  border-radius: 5px;
+  padding: 2px 5px;
+  color: black;
+  font-weight: 500;
+}
+</style>

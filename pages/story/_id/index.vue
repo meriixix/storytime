@@ -8,14 +8,12 @@
             <p>{{ getDate(story.createdAt) }}</p>
             <div class="detail-image">
               <img
-                :src="setImage(story)"
+                :src="story.story_image"
                 :alt="story.title"
                 class="img-fluid"
               />
             </div>
-            <div>
-              <p v-html="story.content"></p>
-            </div>
+            <div v-html="story.content"></div>
           </div>
         </div>
         <div class="col-4">
@@ -23,13 +21,13 @@
             <h2>Author</h2>
             <div class="story-aside__author">
               <img
-                :src="`https://storytime-api.strapi.timedoor-js.web.id${story.author.profile_picture.url}`"
-                :alt="story.author.name"
+                :src="`https://storytime-api.strapi.timedoor-js.web.id${story.profile_picture}`"
+                :alt="story.name"
                 class="author-avatar img-fluid rounded-circle"
               />
-              <h2>{{ story.author.name }}</h2>
+              <h2>{{ story.name }}</h2>
               <p>
-                {{ story.author.biodata }}
+                {{ story.biodata }}
               </p>
             </div>
           </div>
@@ -40,34 +38,51 @@
 </template>
 
 <script>
-import axios from "axios";
-
 export default {
-  async asyncData({ params }) {
-    try {
-      const { data } = await axios.get(
-        `https://storytime-api.strapi.timedoor-js.web.id/api/stories/${params.id}`
-      );
-      return { story: data.data };
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return { data: [] };
-    }
+  data() {
+    return {
+      story: { },
+    };
+  },
+  async fetch() {
+    await this.$store.dispatch("story/fetchDetailStory", this.$route.params.id);
+    this.story = this.$store.getters["story/getDetailStory"];
   },
   methods: {
     getDate(arg) {
       const date = new Date(arg);
-      const month = date.toLocaleDateString("default", {month: "long"})
-      const day = date.getDate()
-      const year = date.getFullYear()
+      const month = date.toLocaleDateString("default", { month: "long" });
+      const day = date.getDate();
+      const year = date.getFullYear();
       return `${day} ${month} ${year}`;
-    },
-    setImage(story) {
-      const isCoverImage = story?.cover_image?.url;
-      return isCoverImage
-        ? `https://storytime-api.strapi.timedoor-js.web.id${story.cover_image.url}`
-        : "https://via.placeholder.com/150";
     },
   },
 };
 </script>
+
+<style scoped>
+.detail-image {
+    margin: 20px 0px;
+    position: relative;
+}
+
+.detail-image img {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.story-aside {
+    position: sticky;
+    top: 7rem;
+}
+
+.author-avatar {
+    width: 70px;
+    height: 70px;
+}
+
+.detail-container {
+    padding-top: 22px;
+}
+</style>
