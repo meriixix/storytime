@@ -7,20 +7,47 @@
         <nuxt-link to="/" class="navbar-brand">
           <img src="/images/logo.svg" alt="" />
         </nuxt-link>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item register">
-              <a class="nav-link" href="#">Register</a>
-            </li>
-            <li class="nav-item login">
-              <a class="nav-link" href="#">Login</a>
-            </li>
-          </ul>
+        <div>
+          <div class="collapse navbar-collapse" id="navbarNav" v-if="getToken">
+            <ul class="navbar-nav ms-auto">
+              <nuxt-link to="/user" tag="li" class="nav-item user">
+                <a class="nav-link" href="#">
+                  <span class="user-icon">
+                    <i class="fa-solid fa-user"></i>
+                  </span>
+                  {{ getUser.name }}
+                </a>
+              </nuxt-link>
+            </ul>
+          </div>
+          <div class="collapse navbar-collapse" id="navbarNav" v-else>
+            <ul class="navbar-nav ms-auto">
+              <nuxt-link to="/register" tag="li" class="nav-item register">
+                <a class="nav-link" href="#">Register</a>
+              </nuxt-link>
+              <nuxt-link to="/login" tag="li" class="nav-item login">
+                <a class="nav-link" href="#">Login</a>
+              </nuxt-link>
+            </ul>
+          </div>
         </div>
       </div>
     </nav>
   </header>
 </template>
+
+<script>
+export default {
+  computed: {
+    getToken() {
+      return this.$store.getters["auth/getToken"];
+    },
+    getUser() {
+      return this.$store.getters["user/getUserData"];
+    },
+  },
+};
+</script>
 
 <style scoped>
 .nav-text {
@@ -48,5 +75,25 @@
 .navbar-nav .login a {
   color: white !important;
   font-weight: 500;
+}
+
+.user {
+  width: 250px;
+  text-align: center;
+  background-color: black;
+}
+
+.navbar-nav .user a {
+  color: white !important;
+  font-weight: 600;
+}
+
+.user-icon {
+  color: black;
+  background-color: white;
+  padding: 2px 5px;
+  border-radius: 50px;
+  margin-right: 2px;
+  font-size: 12px;
 }
 </style>
