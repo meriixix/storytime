@@ -90,7 +90,7 @@
                 Register
               </button>
             </div>
-            <div>
+            <div class="mt-3">
               <p>
                 Already have account ?
                 <nuxt-link to="/login" class="login-btn">Login</nuxt-link>

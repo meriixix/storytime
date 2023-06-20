@@ -41,7 +41,7 @@
                 Login
               </button>
             </div>
-            <div>
+            <div class="mt-3">
               <p>
                 Don't have an account yet ?
                 <nuxt-link to="/register" class="register-btn"

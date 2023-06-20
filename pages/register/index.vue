@@ -1,7 +1,5 @@
 <template>
   <main class="main-wrapper container-sm">
-    <!-- {{ registerStatus }} -->
-    <!-- <register-form></register-form> -->
     <component :is="registerStatus"></component>
   </main>
 </template>
@@ -11,6 +9,7 @@ import RegisterForm from "@/components/auth/RegisterForm.vue";
 import RegistrationSuccess from "@/components/auth/RegistrationSuccess.vue"
 
 export default {
+  middleware: ["auth"],
   components: {
     RegisterForm,
     RegistrationSuccess

@@ -8,6 +8,7 @@
 import LoginForm from "@/components/auth/LoginForm.vue"
 
 export default {
+    middleware:["auth"],
     components: {
         LoginForm
     }
