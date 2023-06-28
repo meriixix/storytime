@@ -10,14 +10,14 @@
         <div>
           <div class="collapse navbar-collapse" id="navbarNav" v-if="getToken">
             <ul class="navbar-nav ms-auto">
-              <nuxt-link to="/user" tag="li" class="nav-item user">
-                <a class="nav-link" href="#">
+              <li to="/user" class="nav-item user">
+                <nuxt-link to="/user" tag="a" class="nav-link">
                   <span class="user-icon">
                     <i class="fa-solid fa-user"></i>
                   </span>
                   {{ getUser.name }}
-                </a>
-              </nuxt-link>
+                </nuxt-link>
+              </li>
             </ul>
           </div>
           <div class="collapse navbar-collapse" id="navbarNav" v-else>

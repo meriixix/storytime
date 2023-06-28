@@ -1,7 +1,7 @@
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'storytime',
+    title: 'Story Time',
     htmlAttrs: {
       lang: 'en'
     },
@@ -12,12 +12,13 @@ export default {
       { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      { rel: 'icon', type: 'image/x-icon', href: '/images/icon.ico' },
       { rel: 'stylesheet', href: '/css/bootstrap.min.css' },
       { rel: 'stylesheet', href: '/css/styles.css' }
     ],
     script: [
-      { src: 'https://kit.fontawesome.com/75f72bf635.js', crossorigin: 'anonymous' }
+      { src: 'https://kit.fontawesome.com/75f72bf635.js', crossorigin: 'anonymous' },
+      { src: '/js/bootstrap.min.js'}
     ]
   },
 

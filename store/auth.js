@@ -1,7 +1,7 @@
 export const state = () => ({
     registerStatus: false,
     loginStatus: false,
-    token: null,
+    token: false,
     errorMessage: ""
 })
 
@@ -47,13 +47,13 @@ export const actions = {
             commit("setErrorMessage", response.error.message)
         }
     },
-    async fetchUserLogin({ commit }, payload) {
+    async fetchUserLogin({ commit, dispatch }, payload) {
         try {
             const { data } = await this.$axios.post('https://storytime-api.strapi.timedoor-js.web.id/api/auth/local', payload)
-            const { jwt, user } = data.data
+            const { jwt } = data.data
             commit("setToken", jwt)
-            commit("user/setUserData", user, { root: true })
             commit("setLoginStatus", true)
+            dispatch("user/getUserProfile", jwt, { root: true })
         } catch (error) {
             const response = error.response.data
             commit("setErrorMessage", response.error.message)
