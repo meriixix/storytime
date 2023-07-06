@@ -147,7 +147,7 @@
               </ValidationProvider>
 
               <base-text-area
-                identity="Biodata"
+                identity="biodata"
                 label="Biodata"
                 v-model="userData.biodata"
               ></base-text-area>
@@ -178,6 +178,14 @@
         @closeToast="closeToast('profile')"
       ></base-success-toast>
       <!-- Sucsess Toast Change Profile End -->
+
+      <!-- Error Toast Image Size Start -->
+      <base-error-toast
+        errorMessage="Maximum file size is 2MB"
+        :isToastShow="errorProfileImageSize"
+        @closeToast="closeToast('image-size')"
+      ></base-error-toast>
+      <!-- Error Toast Image Size End -->
     </div>
   </div>
 </template>
@@ -188,6 +196,7 @@ import "cropperjs/dist/cropper.css";
 import BaseInput from "@/components/ui/BaseInput.vue";
 import BaseTextArea from "@/components/ui/BaseTextArea.vue";
 import BaseSuccessToast from "~/components/ui/BaseSuccessToast.vue";
+import BaseErrorToast from "@/components/ui/BaseErrorToast.vue";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 export default {
   data() {
@@ -200,6 +209,7 @@ export default {
       isEditProfile: false,
       editAvatarToastShow: false,
       editProfileToastShow: false,
+      errorProfileImageSize: false,
     };
   },
   components: {
@@ -209,6 +219,7 @@ export default {
     ValidationProvider,
     BaseTextArea,
     BaseSuccessToast,
+    BaseErrorToast,
   },
   mounted() {
     const { email, name, biodata, profile_picture, id } =
@@ -221,6 +232,12 @@ export default {
   methods: {
     setImage(e) {
       const file = e.target.files[0];
+      console.log("gambar baru", file.size);
+      if (file.size > 2097152) {
+        this.errorProfileImageSize = true;
+        document.getElementById("avatar-btn").value = ""
+        return;
+      }
       this.imageDetail = {
         type: e.target.files[0].type,
         name: e.target.files[0].name,
@@ -275,6 +292,8 @@ export default {
         this.editAvatarToastShow = false;
       } else if (option == "profile") {
         this.editProfileToastShow = false;
+      } else if (option === "image-size") {
+        this.errorProfileImageSize = false;
       }
     },
   },
@@ -283,14 +302,21 @@ export default {
       if (newValue) {
         setTimeout(() => {
           this.editAvatarToastShow = false;
-        }, 2000);
+        }, 3500);
       }
     },
     editProfileToastShow(newValue) {
       if (newValue) {
         setTimeout(() => {
           this.editProfileToastShow = false;
-        }, 2000);
+        }, 3500);
+      }
+    },
+    errorProfileImageSize(newValue) {
+      if (newValue) {
+        setTimeout(() => {
+          this.errorProfileImageSize = false;
+        }, 3500);
       }
     },
   },
