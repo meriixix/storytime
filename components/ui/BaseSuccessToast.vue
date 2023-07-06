@@ -43,13 +43,13 @@ export default {
 
 .toast-header {
   color: #0f5132;
-  background-color: #bed7cc;
-  border-color: #badbcc;
+  background-color: #dcf6eb;
+  border-color: #dcf6eb;
 }
 
 .toast-body {
   color: #0f5132;
-  background-color: #d1e7dd;
+  background-color: #ecfcf5;
   border-color: #badbcc;
 }
 
