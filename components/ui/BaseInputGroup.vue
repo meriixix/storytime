@@ -10,6 +10,7 @@
         :name="identity"
         @input="$emit('input', $event.target.value)"
         @blur="$emit('input', $event.target.value)"
+        :disabled="disabled"
       />
       <button type="button" class="btn" @click="$emit('passwordShow')">
         <i
@@ -33,6 +34,7 @@ export default {
     type: { type: String, require: true },
     error: { type: Array },
     isShowPassword: { type: Boolean, require: true },
+    disabled: {type: Boolean, default: false },
     value: "",
   },
   computed: {

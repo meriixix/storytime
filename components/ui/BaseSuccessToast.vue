@@ -1,15 +1,17 @@
 <template>
-  <div class="toast-container toast-dismissible">
+  <div class="toast-container">
     <div
-      :class="['toast', { show: isToastShow, hide: !isToastShow }]"
+      class="toast"
       role="alert"
+      id="liveToast"
     >
       <div class="toast-header">
-        <strong class="me-auto">Failed</strong>
+        <strong class="me-auto">Success</strong>
         <button
           type="button"
           class="btn-close"
-          @click="$emit('closeToast')"
+          aria-label="Close"
+          @click="closeToast"
         ></button>
       </div>
       <div class="toast-body">{{ message }}</div>
@@ -19,9 +21,27 @@
 
 <script>
 export default {
-  props: {
-    isToastShow: { type: Boolean, require: true },
-    message: { type: String, require: true },
+  data() {
+    return {
+      message: ""
+    }
+  },
+  methods: {
+    closeToast() {
+      new bootstrap.Toast("#liveToast").hide();
+      this.$store.commit("setSuccessToast", {status: false, message: ""})
+    }
+  },
+  mounted() {
+    const showToast = this.$store.getters.getShowSuccessToast
+    if ( showToast.status ) {
+      this.message = showToast.message
+      new bootstrap.Toast("#liveToast").show();
+      setTimeout(() => {
+        this.$store.commit("setSuccessToast", {status: false, message: ""})
+        this.message = ""
+      }, 5000)
+    } 
   },
 };
 </script>

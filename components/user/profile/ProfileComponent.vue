@@ -52,6 +52,7 @@
                   class="btn btn-outline-primary edit-profile__btn-cancel shadow-none"
                   data-bs-dismiss="modal"
                   @click="cropImg = ''"
+                  id="cropperCancel"
                 >
                   Cancel
                 </button>
@@ -59,9 +60,10 @@
                   type="button"
                   class="btn btn-outline-primary edit-profile__btn-save shadow-none"
                   @click.prevent="cropImage"
-                  data-bs-dismiss="modal"
+                  id="cropperChanges"
                 >
                   Changes
+                  <base-spinner v-if="showCropSpinner"></base-spinner>
                 </button>
               </div>
             </div>
@@ -86,16 +88,11 @@
               >Change Avatar</label
             >
           </div>
+
+          <base-error-toast v-if="errorProfileImageSize"></base-error-toast>
+          <base-success-toast v-if="editAvatarToastShow"></base-success-toast>
         </div>
         <!-- Profile Image End -->
-
-        <!-- Success Toast Change Image start -->
-        <base-success-toast
-          :isToastShow="editAvatarToastShow"
-          :message="'Successfully change avatar'"
-          @closeToast="closeToast('avatar')"
-        ></base-success-toast>
-        <!-- Success Toast Change Image End -->
       </div>
       <!-- Avatar End -->
 
@@ -118,6 +115,7 @@
               </tr>
             </tbody>
           </table>
+          <base-success-toast></base-success-toast>
         </div>
         <div class="edit-profile" v-else>
           <ValidationObserver v-slot="{ handleSubmit }">
@@ -133,36 +131,40 @@
                   label="Name"
                   v-model="userData.name"
                   :error="errors"
+                  :disabled="nameInputDisabled"
                 ></base-input>
               </ValidationProvider>
 
-              <ValidationProvider name="Email" v-slot="{ errors }">
                 <base-input
                   type="email"
                   identity="email"
                   label="Email"
                   v-model="userData.email"
-                  :error="errors"
+                  :disabled="true"
                 ></base-input>
-              </ValidationProvider>
 
               <base-text-area
                 identity="biodata"
                 label="Biodata"
                 v-model="userData.biodata"
+                :disabled="biodataInputDisabled"
               ></base-text-area>
+
               <div class="mt-3 edit-profile__btn">
                 <button
                   type="button"
                   class="btn btn-outline-primary edit-profile__btn-cancel shadow-none"
                   @click="isEditProfile = false"
+                  id="editProfileCancel"
                 >
                   Cancel
                 </button>
                 <button
                   class="btn btn-outline-primary edit-profile__btn-save shadow-none"
+                  id="editProfileSave"
                 >
                   Save
+                  <base-spinner v-if="showEditProfileSpinner"></base-spinner>
                 </button>
               </div>
             </form>
@@ -170,22 +172,6 @@
         </div>
       </div>
       <!-- Biodata End -->
-
-      <!-- Sucsess Toast Change Profile Start -->
-      <base-success-toast
-        :isToastShow="editProfileToastShow"
-        :message="'Successfully update profile'"
-        @closeToast="closeToast('profile')"
-      ></base-success-toast>
-      <!-- Sucsess Toast Change Profile End -->
-
-      <!-- Error Toast Image Size Start -->
-      <base-error-toast
-        errorMessage="Maximum file size is 2MB"
-        :isToastShow="errorProfileImageSize"
-        @closeToast="closeToast('image-size')"
-      ></base-error-toast>
-      <!-- Error Toast Image Size End -->
     </div>
   </div>
 </template>
@@ -197,6 +183,7 @@ import BaseInput from "@/components/ui/BaseInput.vue";
 import BaseTextArea from "@/components/ui/BaseTextArea.vue";
 import BaseSuccessToast from "~/components/ui/BaseSuccessToast.vue";
 import BaseErrorToast from "@/components/ui/BaseErrorToast.vue";
+import BaseSpinner from "@/components/ui/BaseSpinner.vue";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 export default {
   data() {
@@ -210,6 +197,11 @@ export default {
       editAvatarToastShow: false,
       editProfileToastShow: false,
       errorProfileImageSize: false,
+      showCropSpinner: false,
+      showEditProfileSpinner: false,
+      nameInputDisabled: false,
+      biodataInputDisabled: false,
+      cropModal: null
     };
   },
   components: {
@@ -220,8 +212,10 @@ export default {
     BaseTextArea,
     BaseSuccessToast,
     BaseErrorToast,
+    BaseSpinner,
   },
   mounted() {
+    this.cropModal = new bootstrap.Modal("#cropperModal")
     const { email, name, biodata, profile_picture, id } =
       this.$store.getters["user/getUserData"];
     this.profileImage = profile_picture
@@ -232,10 +226,13 @@ export default {
   methods: {
     setImage(e) {
       const file = e.target.files[0];
-      console.log("gambar baru", file.size);
       if (file.size > 2097152) {
         this.errorProfileImageSize = true;
-        document.getElementById("avatar-btn").value = ""
+        this.$store.commit("setErrorToast", {
+          status: true,
+          message: "Maximum file size is 2MB",
+        });
+        document.getElementById("avatar-btn").value = "";
         return;
       }
       this.imageDetail = {
@@ -251,9 +248,13 @@ export default {
         }, 150);
         e.target.value = "";
       });
-      new bootstrap.Modal("#cropperModal").show();
+      this.cropModal.show();
     },
     cropImage() {
+      this.showCropSpinner = true;
+      document.getElementById("cropperCancel").disabled = true
+      document.getElementById("cropperChanges").disabled = true
+
       this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
         const form = new FormData();
         form.append("files", blob);
@@ -262,7 +263,7 @@ export default {
         form.append("field", "profile_picture");
         this.updateProfilePicture(form);
       }, "image/*");
-      this.cropImg = "";
+      // this.cropImg = "";
     },
     async updateProfilePicture(form) {
       let { profile_picture } = this.$store.getters["user/getUserData"];
@@ -277,24 +278,42 @@ export default {
       } else {
         await this.$store.dispatch("user/postUserProfile", form);
       }
+      
+      this.cropModal.hide();
+      
+      this.cropImg = "";
+      this.showCropSpinner = false;
+      document.getElementById("cropperCancel").disabled = false
+      document.getElementById("cropperChanges").disabled = false
+
       this.editAvatarToastShow = true;
+      this.$store.commit("setSuccessToast", {
+        status: true,
+        message: "Successfully change avatar",
+      });
     },
     async onProfileSubmit() {
+      this.showEditProfileSpinner = true
+      document.getElementById("editProfileCancel").disabled = true
+      document.getElementById("editProfileSave").disabled = true
+      this.biodataInputDisabled = true
+      this.nameInputDisabled = true
+      
       await this.$store.dispatch("user/ediUserProfile", {
         biodata: this.userData.biodata,
         name: this.userData.name,
       });
       this.isEditProfile = false;
-      this.editProfileToastShow = true;
-    },
-    closeToast(option) {
-      if (option == "avatar") {
-        this.editAvatarToastShow = false;
-      } else if (option == "profile") {
-        this.editProfileToastShow = false;
-      } else if (option === "image-size") {
-        this.errorProfileImageSize = false;
-      }
+      this.showEditProfileSpinner = false
+      document.getElementById("editProfileCancel").disabled = false
+      document.getElementById("editProfileSave").disabled = false
+      this.biodataInputDisabled = false
+      this.nameInputDisabled = false
+
+      this.$store.commit("setSuccessToast", {
+        status: true,
+        message: "Successfully update profile",
+      });
     },
   },
   watch: {
@@ -302,21 +321,14 @@ export default {
       if (newValue) {
         setTimeout(() => {
           this.editAvatarToastShow = false;
-        }, 3500);
-      }
-    },
-    editProfileToastShow(newValue) {
-      if (newValue) {
-        setTimeout(() => {
-          this.editProfileToastShow = false;
-        }, 3500);
+        }, 5000);
       }
     },
     errorProfileImageSize(newValue) {
       if (newValue) {
         setTimeout(() => {
           this.errorProfileImageSize = false;
-        }, 3500);
+        }, 5000);
       }
     },
   },

@@ -31,6 +31,7 @@
               @passwordShow="changeOldPasswordStatus"
               :isShowPassword="oldPasswordStatus"
               v-model="oldPassword"
+              :disabled="oldPasswordDisabled"
             ></base-input-group>
           </ValidationProvider>
 
@@ -49,6 +50,7 @@
               @passwordShow="changeNewPasswordStatus"
               :isShowPassword="newPasswordStatus"
               v-model="newPassword"
+              :disabled="newPasswordDisabled"
             ></base-input-group>
           </ValidationProvider>
 
@@ -66,6 +68,7 @@
               @passwordShow="changeNewPasswordConfirmationStatus"
               :isShowPassword="newPasswordConfirmationStatus"
               v-model="confirmationPassword"
+              :disabled="confirmPasswordDisabled"
             ></base-input-group>
           </ValidationProvider>
           <div class="mt-3 edit-password__btn">
@@ -73,28 +76,23 @@
               type="button"
               class="btn btn-outline-primary edit-password__btn-cancel"
               @click="cancelEditPassword"
+              id="editPasswordCancel"
             >
               Cancel
             </button>
-            <button class="btn btn-outline-primary edit-password__btn-save">
+            <button
+              class="btn btn-outline-primary edit-password__btn-save"
+              id="editPasswordSave"
+            >
               Save
+              <base-spinner v-if="showEditPassSpinner"></base-spinner>
             </button>
           </div>
         </form>
       </ValidationObserver>
     </div>
-    <base-error-toast
-      v-if="erorrStatus.isError"
-      :isToastShow="showToast"
-      :errorMessage="erorrStatus.message"
-      @closeToast="closeToast"
-    ></base-error-toast>
-    <base-success-toast
-      v-if="!erorrStatus.isError"
-      :isToastShow="showToast"
-      :errorMessage="erorrStatus.message"
-      @closeToast="closeToast"
-    ></base-success-toast>
+    <base-error-toast v-if="erorrStatus.isError"></base-error-toast>
+    <base-success-toast></base-success-toast>
   </div>
 </template>
 
@@ -102,6 +100,7 @@
 import BaseInputGroup from "@/components/ui/BaseInputGroup.vue";
 import BaseErrorToast from "@/components/ui/BaseErrorToast.vue";
 import BaseSuccessToast from "@/components/ui/BaseSuccessToast.vue";
+import BaseSpinner from "@/components/ui/BaseSpinner.vue";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 
 export default {
@@ -111,6 +110,7 @@ export default {
     ValidationProvider,
     BaseErrorToast,
     BaseSuccessToast,
+    BaseSpinner,
   },
   data() {
     return {
@@ -123,6 +123,10 @@ export default {
       confirmationPassword: "",
       erorrStatus: {},
       showToast: false,
+      showEditPassSpinner: false,
+      oldPasswordDisabled: false,
+      newPasswordDisabled: false,
+      confirmPasswordDisabled: false,
     };
   },
   methods: {
@@ -136,16 +140,38 @@ export default {
       this.oldPasswordStatus = !this.oldPasswordStatus;
     },
     async onPasswordSubmit() {
+      this.showEditPassSpinner = true;
+      this.oldPasswordDisabled = true;
+      this.newPasswordDisabled = true;
+      this.confirmPasswordDisabled = true;
+
       await this.$store.dispatch("user/resetPassword", {
         currentPassword: this.oldPassword,
         newPassword: this.newPassword,
       });
+
       this.oldPassword = "";
       this.newPassword = "";
       this.confirmationPassword = "";
       this.isEditPassword = false;
+
+      this.showEditPassSpinner = false;
+      this.oldPasswordDisabled = false;
+      this.newPasswordDisabled = false;
+      this.confirmPasswordDisabled = false;
+
       this.erorrStatus = this.$store.getters["user/getEditPasswordError"];
-      this.showToast = true;
+      if (this.erorrStatus.isError) {
+        this.$store.commit("setErrorToast", {
+          status: true,
+          message: this.erorrStatus.message,
+        });
+      } else {
+        this.$store.commit("setSuccessToast", {
+          status: true,
+          message: "Successfully update new password",
+        });
+      }
     },
     closeToast() {
       this.$store.commit("user/setEditPasswordError", {

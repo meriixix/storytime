@@ -8,6 +8,7 @@
       placeholder="Enter about me"
       @input="$emit('input', $event.target.value)"
       :value="value"
+      :disabled="disabled"
     ></textarea>
   </div>
 </template>
@@ -17,6 +18,7 @@ export default {
   props: {
     identity: { type: String, require: true },
     label: { type: String, require: true },
+    disabled: { type: Boolean, default: false },
     value: ""
   },
 };

@@ -1,24 +1,44 @@
 <template>
-  <div class="toast-container toast-dismissible">
-    <div
-      :class="['toast', { 'show': isToastShow, 'hide': !isToastShow }]"
-      role="alert"
-    >
+  <div class="toast-container">
+    <div class="toast" role="alert" id="erorrToast">
       <div class="toast-header">
         <strong class="me-auto">Failed</strong>
-        <button type="button" class="btn-close" @click="$emit('closeToast')"></button>
+        <button
+          type="button"
+          class="btn-close"
+          @click="closeToast"
+          aria-label="Close"
+        ></button>
       </div>
-      <div class="toast-body">{{ errorMessage }}</div>
+      <div class="toast-body">{{ message }}</div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: {
-    isToastShow: { type: Boolean, require: true },
-    errorMessage: { type: String, require: true },
-  }
+  data() {
+    return {
+      message: "",
+    };
+  },
+  methods: {
+    closeToast() {
+      new bootstrap.Toast("#erorrToast").hide();
+      this.$store.commit("setErrorToast", { status: false, message: "" });
+    },
+  },
+  mounted() {
+    const showToast = this.$store.getters.getShowErrorToast;
+    if (showToast.status) {
+      this.message = showToast.message;
+      new bootstrap.Toast("#erorrToast").show();
+      setTimeout(() => {
+        this.$store.commit("setErrorToast", { status: false, message: "" });
+        this.message = "";
+      }, 5000);
+    }
+  },
 };
 </script>
 

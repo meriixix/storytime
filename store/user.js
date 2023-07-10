@@ -82,7 +82,7 @@ export const actions = {
                     'Authorization': `Bearer ${rootGetters["auth/getToken"]}`
                 }
             })
-            commit("setEditPasswordError", { isError: false, message: "Successfully update password" })
+            // commit("setEditPasswordError", { isError: false, message: "Successfully update password" })
         } catch (error) {
             const response = error.response.data
             commit("setEditPasswordError", { isError: true, message: response.error.message })

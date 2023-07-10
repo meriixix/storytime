@@ -13,11 +13,11 @@
         <tbody>
           <tr v-for="story in storyList" :key="story.id">
             <th>
-              <a href="">{{ story.title }}</a>
+              <nuxt-link :to="`/story/${story.id}S`" href="">{{ story.title }}</nuxt-link>
             </th>
             <td>{{ getDate(story.updatedAt) }}</td>
             <td>
-              <button class="btn btn-outline-primary story-list__btn-edit">
+              <nuxt-link tag="button" :to="`/user/story/${story.id}/edit`" class="btn btn-outline-primary story-list__btn-edit">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -38,7 +38,7 @@
                   <path fill="none" d="M0 0h36v36H0z" />
                 </svg>
                 Edit
-              </button>
+              </nuxt-link>
               <button class="btn btn-outline-primary story-list__btn-save">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -110,8 +110,8 @@ export default {
     getDate(arg) {
       const date = new Date(arg);
       const newDate = date.toDateString().split(" ");
-      const hour = date.getHours();
-      let minutes = date.getMinutes().length > 1 ? date.getMinutes() : `0${date.getMinutes()}`;
+      const hour = ("0" + date.getHours()).slice(-2);
+      const minutes = ("0" + date.getMinutes()).slice(-2)
       return `${hour}:${minutes}, ${newDate[2]} ${newDate[1]} ${newDate[3]}`;
     },
     async pageClick(page) {

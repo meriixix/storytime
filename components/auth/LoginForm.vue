@@ -17,6 +17,7 @@
                 label="Email/Username"
                 :error="errors"
                 v-model="identifier"
+                :disabled="emailInputDisabled"
               ></base-input>
             </ValidationProvider>
 
@@ -34,11 +35,17 @@
                 :error="errors"
                 @passwordShow="changePasswordStatus"
                 :isShowPassword="passwordStatus"
+                :disabled="passInputDisabled"
               ></base-input-group>
             </ValidationProvider>
             <div>
-              <button type="submit" class="login-btn btn btn-dark">
+              <button
+                type="submit"
+                class="login-btn btn btn-dark"
+                id="loginButton"
+              >
                 Login
+                <base-spinner v-if="showSpinner"></base-spinner>
               </button>
             </div>
             <div class="mt-3">
@@ -53,16 +60,17 @@
         </ValidationObserver>
       </div>
     </div>
-    <!-- Tast Start -->
-    <failed-auth-toast :isToastShow="isToastShow" :errorMessage="errorMessage" @closeToast="isToastShow = false"></failed-auth-toast>
-    <!-- Toast End -->
+
+    <base-error-toast v-if="errorToastShow"></base-error-toast>
+
   </div>
 </template>
 
 <script>
 import BaseInput from "../ui/BaseInput.vue";
 import BaseInputGroup from "../ui/BaseInputGroup.vue";
-import FailedAuthToast from "./FailedAuthToast.vue";
+import BaseSpinner from "@/components/ui/BaseSpinner.vue";
+import BaseErrorToast from "@/components/ui/BaseErrorToast.vue";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 
 export default {
@@ -71,15 +79,19 @@ export default {
     ValidationProvider,
     ValidationObserver,
     BaseInputGroup,
-    FailedAuthToast,
+    BaseSpinner,
+    BaseErrorToast,
   },
   data() {
     return {
       identifier: "",
       password: "",
       passwordStatus: false,
-      isToastShow: false,
+      errorToastShow: false,
       errorMessage: "",
+      emailInputDisabled: false,
+      passInputDisabled: false,
+      showSpinner: false,
     };
   },
   methods: {
@@ -87,16 +99,39 @@ export default {
       this.passwordStatus = !this.passwordStatus;
     },
     async onSubmit() {
+      document.getElementById("loginButton").disabled = true;
+      this.emailInputDisabled = true;
+      this.passInputDisabled = true;
+      this.showSpinner = true;
+
       await this.$store.dispatch("auth/fetchUserLogin", {
         identifier: this.identifier,
         password: this.password,
       });
 
+      document.getElementById("loginButton").disabled = false;
+      this.emailInputDisabled = false;
+      this.passInputDisabled = false;
+      this.showSpinner = false;
+
       if (!this.$store.getters["auth/getLoginStatus"]) {
-        this.isToastShow = true;
+        this.errorToastShow = true;
         this.errorMessage = this.$store.getters["auth/getErrorMessage"];
+        this.$store.commit("setErrorToast", {
+          status: true,
+          message: this.errorMessage,
+        });
       } else {
         this.$router.push("/");
+      }
+    },
+  },
+  watch: {
+    errorToastShow(newValue) {
+      if (newValue) {
+        setTimeout(() => {
+          this.errorToastShow = false;
+        }, 5000);
       }
     },
   },

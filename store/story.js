@@ -4,7 +4,6 @@ export const state = () => ({
     detailStory: {},
     categoryList: {},
     storyId: "",
-    isNewStoryAdded: false
 })
 
 export const getters = {
@@ -22,9 +21,6 @@ export const getters = {
     },
     getStoryId(state) {
         return state.storyId
-    },
-    getIsNewStoryAdded(state) {
-        return state.isNewStoryAdded
     }
 }
 
@@ -48,9 +44,6 @@ export const mutations = {
     },
     setStoryId(state, payload) {
         state.storyId = payload
-    },
-    setIsNewStoryAdded(state, payload) {
-        state.isNewStoryAdded = payload
     }
 }
 
@@ -64,11 +57,12 @@ export const actions = {
         commit("setPagination", data.meta.pagination)
         commit("setStoryList", data.data)
     },
-    async fetchDetailStory({ commit }, payload) {
-        const { data } = await this.$axios.get(`https://storytime-api.strapi.timedoor-js.web.id/api/stories/${payload}`)
-        const { title, content, createdAt, cover_image, author: { profile_picture, name, biodata } } = data.data
+    async fetchDetailStory({ commit }, storyId) {
+        const { data } = await this.$axios.get(`https://storytime-api.strapi.timedoor-js.web.id/api/stories/${storyId}`)
+        const { title, content, createdAt, cover_image, author: { profile_picture, name, biodata }, category } = data.data
         const story_image = cover_image?.url ? `https://storytime-api.strapi.timedoor-js.web.id${cover_image.url}` : "https://via.placeholder.com/150"
-        commit("setDetailStory", { title, content, createdAt, name, biodata, story_image, profile_picture: profile_picture.url })
+        const story_image_id = cover_image?.id ? cover_image.id : null;
+        commit("setDetailStory", { title, content, createdAt, name, biodata, story_image, profile_picture: profile_picture.url, categoryId: category.id, storyImageId: story_image_id })
     },
     async fetchCategoryList({ commit }) {
         const { data } = await this.$axios.get(`https://storytime-api.strapi.timedoor-js.web.id/api/categories`)
@@ -106,6 +100,37 @@ export const actions = {
             })
         } catch (error) {
             console.log("Upload Story Image", error);
+        }
+    },
+    async updateStory({ rootGetters, dispatch }, { storyData, storyId, imageId }) {
+        try {
+            const { data } = await this.$axios.put(`https://storytime-api.strapi.timedoor-js.web.id/api/stories/${storyId}`, { data: { title: storyData.title, content: storyData.content, category: parseInt(storyData.category) } }, {
+                headers: {
+                    'Authorization': `Bearer ${rootGetters["auth/getToken"]}`
+                }
+            })
+            if (storyData.imageFile) {
+                console.log("Ada gambar");
+                await this.$axios.delete(`https://storytime-api.strapi.timedoor-js.web.id/api/upload/files/${imageId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${rootGetters["auth/getToken"]}`
+                    }
+                })
+
+                const form = new FormData();
+                form.append("files", storyData.imageFile);
+                form.append("refId", storyId);
+                form.append("ref", "api::story.story");
+                form.append("field", "cover_image");
+
+                try {
+                    dispatch("uploadStoryImage", form)
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        } catch (error) {
+            console.log(error);
         }
     }
 }

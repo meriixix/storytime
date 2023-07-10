@@ -2,8 +2,8 @@
   <div class="mb-3">
     <label :for="identity" class="form-label">{{ label }}</label>
     <select :class="['form-select shadow-none', {'error-form': isError}]" :id="identity" @input="$emit('input', $event.target.value)">
-      <option selected disabled>Select a category</option>
-      <option v-for="option in options" :key="option.id" :value="option.id">
+      <option disabled :selected="selected == ''">Select a category</option>
+      <option v-for="option in options" :key="option.id" :value="option.id" :selected="option.id == selected">
         {{ option.name }}
       </option>
     </select>
@@ -19,6 +19,7 @@ export default {
     error: { type: Array },
     value: "",
     options: { type: Array, require: true },
+    selected: { type: String, require: true}
   },
   computed: {
     isError() {

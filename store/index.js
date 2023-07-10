@@ -1,3 +1,26 @@
+export const state = () => ({
+    showSuccessToast: { status: false, message: "" },
+    showErrorToast : { status: false, message: "" }
+})
+
+export const getters = {
+    getShowSuccessToast(state) {
+        return state.showSuccessToast
+    },
+    getShowErrorToast(state) {
+        return state.showErrorToast
+    }
+}
+
+export const mutations = {
+    setSuccessToast(state, payload) {
+        state.showSuccessToast = payload
+    },
+    setErrorToast(state, payload) {
+        state.showErrorToast = payload
+    }
+}
+
 export const actions = {
     async nuxtServerInit({ commit }, payload) {
         const token = this.$cookies.get("jwt")

@@ -17,6 +17,7 @@
                 label="Name"
                 :error="errors"
                 v-model="name"
+                :disabled="formDisabled"
               ></base-input>
             </ValidationProvider>
 
@@ -32,6 +33,7 @@
                 label="Username"
                 :error="errors"
                 v-model="username"
+                :disabled="formDisabled"
               ></base-input>
             </ValidationProvider>
 
@@ -47,6 +49,7 @@
                 label="Email"
                 :error="errors"
                 v-model="email"
+                :disabled="formDisabled"
               ></base-input>
             </ValidationProvider>
 
@@ -65,6 +68,7 @@
                 :error="errors"
                 @passwordShow="changePasswordStatus"
                 :isShowPassword="passwordStatus"
+                :disabled="formDisabled"
               ></base-input-group>
             </ValidationProvider>
 
@@ -83,11 +87,17 @@
                 @passwordShow="changeConfirmPasswordStatus"
                 :isShowPassword="confirmPasswordStatus"
                 :data-vv-as="password"
+                :disabled="formDisabled"
               ></base-input-group>
             </ValidationProvider>
             <div>
-              <button type="submit" class="register-btn btn btn-dark">
+              <button
+                type="submit"
+                class="register-btn btn btn-dark"
+                id="registerButton"
+              >
                 Register
+                <base-spinner v-if="showSpinner"></base-spinner>
               </button>
             </div>
             <div class="mt-3">
@@ -100,19 +110,27 @@
         </ValidationObserver>
       </div>
     </div>
-    <!-- Toast Start -->
-    <failed-auth-toast :isToastShow="isToastShow" :errorMessage="errorMessage" @closeToast="isToastShow = false"></failed-auth-toast>
-    <!-- Toast End -->
+
+    <base-error-toast v-if="errorToastShow"></base-error-toast>
   </div>
 </template>
 
 <script>
 import BaseInput from "../ui/BaseInput.vue";
 import BaseInputGroup from "../ui/BaseInputGroup.vue";
-import FailedAuthToast from "./FailedAuthToast.vue"
+import BaseSpinner from "@/components/ui/BaseSpinner.vue";
+import BaseErrorToast from "@/components/ui/BaseErrorToast.vue";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 
 export default {
+  components: {
+    BaseInput,
+    ValidationProvider,
+    ValidationObserver,
+    BaseInputGroup,
+    BaseSpinner,
+    BaseErrorToast,
+  },
   data() {
     return {
       name: "",
@@ -122,12 +140,18 @@ export default {
       passwordConfirmation: "",
       passwordStatus: false,
       confirmPasswordStatus: false,
-      isToastShow: false,
-      errorMessage: ""
+      errorToastShow: false,
+      errorMessage: "",
+      showSpinner: false,
+      formDisabled: false,
     };
   },
   methods: {
     async onSubmit() {
+      document.getElementById("registerButton").disabled = true;
+      this.showSpinner = true;
+      this.formDisabled = true
+
       await this.$store.dispatch("auth/addUserData", {
         name: this.name,
         username: this.username,
@@ -135,9 +159,17 @@ export default {
         password: this.password,
       });
 
-      if ( !this.$store.getters["auth/getRegisterStatus"] ) {
-        this.isToastShow = true
-        this.errorMessage = this.$store.getters["auth/getErrorMessage"]
+      // document.getElementById("registerButton").disabled = false;
+      this.showSpinner = false;
+      this.formDisabled = false
+
+      if (!this.$store.getters["auth/getRegisterStatus"]) {
+        this.errorToastShow = true;
+        this.errorMessage = this.$store.getters["auth/getErrorMessage"];
+        this.$store.commit("setErrorToast", {
+          status: true,
+          message: this.errorMessage,
+        });
       }
     },
     changePasswordStatus() {
@@ -145,14 +177,7 @@ export default {
     },
     changeConfirmPasswordStatus() {
       this.confirmPasswordStatus = !this.confirmPasswordStatus;
-    }
-  },
-  components: {
-    BaseInput,
-    ValidationProvider,
-    ValidationObserver,
-    BaseInputGroup,
-    FailedAuthToast
+    },
   },
 };
 </script>

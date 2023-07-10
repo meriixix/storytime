@@ -1,8 +1,6 @@
 <template>
   <div class="story-container">
-    <div
-      class="d-flex justify-content-between user-story-list__header"
-    >
+    <div class="d-flex justify-content-between user-story-list__header">
       <div>
         <h2 class="story-title">Story List</h2>
       </div>
@@ -19,10 +17,7 @@
 
     <!-- Component -->
     <story-list></story-list>
-    <base-success-toast
-      message="Successfully create story"
-      :isToastShow="showToast"
-    ></base-success-toast>
+    <base-success-toast></base-success-toast>
   </div>
 </template>
 
@@ -34,25 +29,7 @@ export default {
   components: {
     StoryList,
     BaseSuccessToast,
-  },
-  data() {
-    return {
-      showToast: false,
-    };
-  },
-  mounted() {
-    this.showToast = this.$store.getters["story/getIsNewStoryAdded"];
-  },
-  watch: {
-    showToast(newValue) {
-      if (newValue) {
-        setTimeout(() => {
-          this.$store.commit("story/setIsNewStoryAdded", false)
-          this.showToast = false
-        }, 5000);
-      }
-    },
-  },
+  }
 };
 </script>
 

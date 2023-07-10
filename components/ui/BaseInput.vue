@@ -28,6 +28,7 @@
       :id="identity"
       :placeholder="placeholder"
       :value="value"
+      :disabled="disabled"
       @input="$emit('input', $event.target.value)"
       @blur="$emit('input', $event.target.value)"
       @change="$emit('onFileSelected', $event.target)"
@@ -44,7 +45,8 @@ export default {
     identity: { type: String, require: true },
     placeholder: { type: String, require: true },
     label: { type: String, require: true },
-    error: { type: Array },
+    error: { type: Array, default: [] },
+    disabled: { type: Boolean, default: false},
     value: "",
   },
   data() {
