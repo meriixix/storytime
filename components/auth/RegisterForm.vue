@@ -159,7 +159,6 @@ export default {
         password: this.password,
       });
 
-      // document.getElementById("registerButton").disabled = false;
       this.showSpinner = false;
       this.formDisabled = false
 

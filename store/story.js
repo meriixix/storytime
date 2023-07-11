@@ -44,6 +44,12 @@ export const mutations = {
     },
     setStoryId(state, payload) {
         state.storyId = payload
+    },
+    deleteStory(state, payload) {
+        const newStory = state.stories.map(item => {
+            return item.id !== payload
+        })
+        state.stories = newStory
     }
 }
 
@@ -110,25 +116,36 @@ export const actions = {
                 }
             })
             if (storyData.imageFile) {
-                console.log("Ada gambar");
                 await this.$axios.delete(`https://storytime-api.strapi.timedoor-js.web.id/api/upload/files/${imageId}`, {
                     headers: {
                         'Authorization': `Bearer ${rootGetters["auth/getToken"]}`
                     }
                 })
-
-                const form = new FormData();
-                form.append("files", storyData.imageFile);
-                form.append("refId", storyId);
-                form.append("ref", "api::story.story");
-                form.append("field", "cover_image");
-
-                try {
-                    dispatch("uploadStoryImage", form)
-                } catch (error) {
-                    console.log(error);
-                }
             }
+
+            const form = new FormData();
+            form.append("files", storyData.imageFile);
+            form.append("refId", storyId);
+            form.append("ref", "api::story.story");
+            form.append("field", "cover_image");
+
+            try {
+                dispatch("uploadStoryImage", form)
+            } catch (error) {
+                console.log(error);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+    async deleteStory({rootGetters}, storyId) {
+        try {
+            await this.$axios.delete(`https://storytime-api.strapi.timedoor-js.web.id/api/stories/${storyId}`, {
+                headers: {
+                    'Authorization': `Bearer ${rootGetters["auth/getToken"]}`
+                }
+            })
+
         } catch (error) {
             console.log(error);
         }

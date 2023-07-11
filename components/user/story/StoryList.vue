@@ -13,11 +13,17 @@
         <tbody>
           <tr v-for="story in storyList" :key="story.id">
             <th>
-              <nuxt-link :to="`/story/${story.id}S`" href="">{{ story.title }}</nuxt-link>
+              <nuxt-link :to="`/story/${story.id}S`" href="">{{
+                story.title
+              }}</nuxt-link>
             </th>
             <td>{{ getDate(story.updatedAt) }}</td>
             <td>
-              <nuxt-link tag="button" :to="`/user/story/${story.id}/edit`" class="btn btn-outline-primary story-list__btn-edit">
+              <nuxt-link
+                tag="button"
+                :to="`/user/story/${story.id}/edit`"
+                class="btn btn-outline-primary story-list__btn-edit shadow-none"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
@@ -39,7 +45,10 @@
                 </svg>
                 Edit
               </nuxt-link>
-              <button class="btn btn-outline-primary story-list__btn-save">
+              <button
+                class="btn btn-outline-primary story-list__btn-save shadow-none"
+                @click="showDeleteModal(story.id)"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"
@@ -59,9 +68,17 @@
         </tbody>
       </table>
 
-      <ul class="pagination justify-content-end" v-if="pagination.pageCount > 1">
-        <li :class="['page-item', { 'disabled': pagination.page == 1}]">
-          <button class="page-link page-item__button" href="#" tabindex="-1" @click="previousPage">
+      <ul
+        class="pagination justify-content-end"
+        v-if="pagination.pageCount > 1"
+      >
+        <li :class="['page-item', { disabled: pagination.page == 1 }]">
+          <button
+            class="page-link page-item__button"
+            href="#"
+            tabindex="-1"
+            @click="previousPage"
+          >
             ‹
           </button>
         </li>
@@ -81,8 +98,19 @@
             {{ pageCount }}
           </button>
         </li>
-        <li :class="['page-item', { 'disabled': pagination.page == pagination.pageCount }]">
-          <button class="page-link page-item__button" href="#" @click="nextPage">›</button>
+        <li
+          :class="[
+            'page-item',
+            { disabled: pagination.page == pagination.pageCount },
+          ]"
+        >
+          <button
+            class="page-link page-item__button"
+            href="#"
+            @click="nextPage"
+          >
+            ›
+          </button>
         </li>
       </ul>
     </div>
@@ -93,17 +121,65 @@
       <h2 class="empty-data__text">No data found</h2>
     </div>
 
+    <!-- Modal Start -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Delete Story</h5>
+            <button
+              type="button"
+              class="btn-close shadow-none"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">Are you sure want to delete this story?</div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-cancel shadow-none"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-delete shadow-none"
+              data-bs-dismiss="modal"
+              @click="deleteStory"
+            >
+              Delete <base-spinner v-if="showSpinner"></base-spinner>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Modal End -->
+    <!-- Success Toast Start -->
+    <base-success-toast v-if="deleteSuccessToast"></base-success-toast>
+    <!-- Success Toast End -->
   </div>
 </template>
 
 <script>
+import BaseSpinner from "@/components/ui/BaseSpinner.vue"
+import BaseSuccessToast from "@/components/ui/BaseSuccessToast.vue"
 export default {
+  components: {
+    BaseSpinner,
+    BaseSuccessToast
+  },
   data() {
     return {
       storyList: [],
       pagination: {},
       userId: "",
-      isEmpty: false
+      isEmpty: false,
+      deleteModal: "",
+      deleteStoryId: "",
+      showSpinner: false,
+      deleteSuccessToast: false
     };
   },
   methods: {
@@ -111,7 +187,7 @@ export default {
       const date = new Date(arg);
       const newDate = date.toDateString().split(" ");
       const hour = ("0" + date.getHours()).slice(-2);
-      const minutes = ("0" + date.getMinutes()).slice(-2)
+      const minutes = ("0" + date.getMinutes()).slice(-2);
       return `${hour}:${minutes}, ${newDate[2]} ${newDate[1]} ${newDate[3]}`;
     },
     async pageClick(page) {
@@ -128,14 +204,35 @@ export default {
     },
     nextPage() {
       const nextPage = this.pagination.page + 1;
-      this.pageClick(nextPage)
+      this.pageClick(nextPage);
     },
     previousPage() {
       const previousPage = this.pagination.page - 1;
-      this.pageClick(previousPage)
-    }
+      this.pageClick(previousPage);
+    },
+    showDeleteModal(id) {
+      this.deleteStoryId = id;
+      this.deleteModal.show();
+    },
+    async deleteStory() {
+      this.showSpinner = true
+      await this.$store.dispatch("story/deleteStory", this.deleteStoryId);
+      await this.$store.dispatch("story/fetchStoryList", {
+        author: this.userId.id,
+      });
+      this.storyList = this.$store.getters["story/getStories"];
+      this.pagination = this.$store.getters["story/getPagination"];
+      this.showSpinner = false
+      this.deleteModal.hide();
+      this.$store.commit("setSuccessToast", {
+        status: true,
+        message: "Successfully delete story",
+      });
+      this.deleteSuccessToast = true
+    },
   },
   async mounted() {
+    this.deleteModal = new bootstrap.Modal("#deleteModal");
     this.storyList = [];
     this.userId = this.$store.getters["user/getUserData"];
     await this.$store.dispatch("story/fetchStoryList", {
@@ -144,6 +241,15 @@ export default {
     this.storyList = this.$store.getters["story/getStories"];
     this.isEmpty = this.storyList.length > 0 ? false : true;
     this.pagination = this.$store.getters["story/getPagination"];
+  },
+  watch: {
+    deleteSuccessToast(newValue) {
+      if (newValue) {
+        setTimeout(() => {
+          this.deleteSuccessToast = false;
+        }, 5000);
+      }
+    }
   },
 };
 </script>
@@ -232,8 +338,9 @@ a:hover {
   color: black;
 }
 
-.page-link:active, .page-link:focus {
-  box-shadow: 0 0 0 .2rem rgba(14,14,14,.25);
+.page-link:active,
+.page-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(14, 14, 14, 0.25);
 }
 
 .page-link.active {
@@ -241,5 +348,31 @@ a:hover {
   background-color: black;
   color: white;
   border-color: black;
+}
+
+.btn-outline-secondary {
+  color: #0e0e0e;
+  border-color: #0e0e0e;
+  border-radius: 0;
+}
+
+.btn-cancel,
+.btn-delete {
+  padding: 7px 25px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.btn-cancel:hover {
+  background-color: white;
+}
+
+.btn-delete {
+  background-color: #343434;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: black;
 }
 </style>
