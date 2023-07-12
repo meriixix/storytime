@@ -4,6 +4,7 @@ export const state = () => ({
     detailStory: {},
     categoryList: {},
     storyId: "",
+    bookmarkList: []
 })
 
 export const getters = {
@@ -21,6 +22,9 @@ export const getters = {
     },
     getStoryId(state) {
         return state.storyId
+    },
+    getBookmarkList(state) {
+        return state.bookmarkList
     }
 }
 
@@ -50,6 +54,38 @@ export const mutations = {
             return item.id !== payload
         })
         state.stories = newStory
+    },
+    setBookmark(state) {
+        const bookmarkList = localStorage.getItem("storyTimeBookmark")
+        state.bookmarkList = JSON.parse(bookmarkList)
+    },
+    setNewBookmark(state, payload) {
+        const bookmark = {
+            author: { name: payload.author.name, username: payload.author.username },
+            category: { name: payload.category.name },
+            cover_image: { url: payload.cover_image.url },
+            id: payload.id,
+            title: payload.title,
+            updatedAt: payload.updatedAt
+        }
+        if ( !state.bookmarkList ) {
+            state.bookmarkList = [bookmark]
+        } else {
+            state.bookmarkList.push(bookmark)
+        }
+        localStorage.setItem("storyTimeBookmark", JSON.stringify(state.bookmarkList))
+    },
+    deleteBookmark(state, payload) {
+        const bookmarkList = state.bookmarkList
+        const newBookmarkList = bookmarkList.filter(item => {
+            if (item.id !== payload ) {
+                return item
+            }
+        })
+        localStorage.removeItem("storyTimeBookmark")
+        if ( newBookmarkList ) {
+            localStorage.setItem("storyTimeBookmark", JSON.stringify(newBookmarkList))
+        }
     }
 }
 

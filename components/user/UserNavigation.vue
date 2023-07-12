@@ -66,6 +66,8 @@
 export default {
   methods: {
     logout() {
+      localStorage.removeItem("storyTimeBookmark")
+      this.$store.commit("story/getBookmark")
       this.$store.commit("auth/setToken", false);
       this.$router.push("/");
     },

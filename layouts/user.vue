@@ -28,5 +28,8 @@ export default {
     WebFooter,
     UserNavigation
   },
+  mounted() {
+    this.$store.commit("story/setBookmark")
+  }
 };
 </script>

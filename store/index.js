@@ -31,6 +31,7 @@ export const actions = {
                         'Authorization': `Bearer ${token}`
                     }
                 })
+                // commit("story/getBookmark")
                 commit("auth/setToken", token)
                 commit("user/setUserData", data.data)
             } catch (error) {

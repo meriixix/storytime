@@ -15,5 +15,8 @@ export default {
     WebHeader,
     WebFooter
   },
+  mounted() {
+    this.$store.commit("story/setBookmark")
+  }
 };
 </script>

@@ -122,6 +122,7 @@ export default {
           message: this.errorMessage,
         });
       } else {
+        this.$store.commit("story/getBookmark")
         this.$router.push("/");
       }
     },
