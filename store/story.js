@@ -4,6 +4,7 @@ export const state = () => ({
     detailStory: {},
     categoryList: {},
     storyId: "",
+    storyForBookmark: {},
     bookmarkList: []
 })
 
@@ -25,6 +26,9 @@ export const getters = {
     },
     getBookmarkList(state) {
         return state.bookmarkList
+    },
+    getStoryForBookmark(state) {
+        return state.storyForBookmark
     }
 }
 
@@ -55,6 +59,9 @@ export const mutations = {
         })
         state.stories = newStory
     },
+    setStoryForBookmark(state, payload) {
+        state.storyForBookmark = payload
+    },
     setBookmark(state) {
         const bookmarkList = localStorage.getItem("storyTimeBookmark")
         state.bookmarkList = JSON.parse(bookmarkList)
@@ -78,10 +85,11 @@ export const mutations = {
     deleteBookmark(state, payload) {
         const bookmarkList = state.bookmarkList
         const newBookmarkList = bookmarkList.filter(item => {
-            if (item.id !== payload ) {
+            if (item.id != payload) {
                 return item
             }
         })
+        
         localStorage.removeItem("storyTimeBookmark")
         if ( newBookmarkList ) {
             localStorage.setItem("storyTimeBookmark", JSON.stringify(newBookmarkList))
@@ -101,10 +109,20 @@ export const actions = {
     },
     async fetchDetailStory({ commit }, storyId) {
         const { data } = await this.$axios.get(`https://storytime-api.strapi.timedoor-js.web.id/api/stories/${storyId}`)
-        const { title, content, createdAt, cover_image, author: { profile_picture, name, biodata }, category } = data.data
+        const { title, content, updatedAt, cover_image, author: { profile_picture, name, biodata }, category } = data.data
         const story_image = cover_image?.url ? `https://storytime-api.strapi.timedoor-js.web.id${cover_image.url}` : "https://via.placeholder.com/150"
         const story_image_id = cover_image?.id ? cover_image.id : null;
-        commit("setDetailStory", { title, content, createdAt, name, biodata, story_image, profile_picture: profile_picture.url, categoryId: category.id, storyImageId: story_image_id })
+        const storyFullData = data.data
+        const storyData = {
+            author: { name: storyFullData.author.name, username: storyFullData.author.username },
+            category: { name: storyFullData.category.name },
+            id: storyFullData.id,
+            title: storyFullData.title,
+            updatedAt: storyFullData.updatedAt,
+            cover_image: { url: storyFullData?.cover_image?.url ? storyFullData.cover_image.url : null }
+        }
+        commit("setStoryForBookmark", storyData)
+        commit("setDetailStory", { title, content, updatedAt, name, biodata, story_image, profile_picture: profile_picture.url, categoryId: category.id, storyImageId: story_image_id })
     },
     async fetchCategoryList({ commit }) {
         const { data } = await this.$axios.get(`https://storytime-api.strapi.timedoor-js.web.id/api/categories`)
