@@ -26,15 +26,15 @@ export const actions = {
         const token = this.$cookies.get("jwt")
         if (token) {
             try {
-                const { data } = await this.$axios.get('https://storytime-api.strapi.timedoor-js.web.id/api/users/me', {
+                const { data } = await this.$axios.get('/users/me', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 })
-                // commit("story/getBookmark")
                 commit("auth/setToken", token)
                 commit("user/setUserData", data.data)
             } catch (error) {
+                console.log("Erorrr Nuxt Server Init");
                 console.log(error)
             }
         }

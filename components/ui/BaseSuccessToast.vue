@@ -20,25 +20,31 @@
 </template>
 
 <script>
+import { mapMutations, mapGetters } from "vuex";
+
 export default {
   data() {
     return {
       message: ""
     }
   },
+  computed: {
+    ...mapGetters(["getShowSuccessToast"])
+  },
   methods: {
+    ...mapMutations(["setSuccessToast"]),
     closeToast() {
       new bootstrap.Toast("#liveToast").hide();
-      this.$store.commit("setSuccessToast", {status: false, message: ""})
+      this.setSuccessToast({status: false, message: ""})
     }
   },
   mounted() {
-    const showToast = this.$store.getters.getShowSuccessToast
+    const showToast = this.getShowSuccessToast
     if ( showToast.status ) {
       this.message = showToast.message
       new bootstrap.Toast("#liveToast").show();
       setTimeout(() => {
-        this.$store.commit("setSuccessToast", {status: false, message: ""})
+        this.setSuccessToast({status: false, message: ""})
         this.message = ""
       }, 5000)
     } 

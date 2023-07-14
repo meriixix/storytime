@@ -72,7 +72,10 @@
         >
           Batal
         </button>
-        <button class="btn btn-outline-primary story-form__btn-save" id="storyButtonSave">
+        <button
+          class="btn btn-outline-primary story-form__btn-save"
+          id="storyButtonSave"
+        >
           Simpan
           <base-spinner v-if="showSpinner"></base-spinner>
         </button>
@@ -87,7 +90,8 @@ import { ValidationProvider, ValidationObserver } from "vee-validate";
 import BaseInput from "@/components/ui/BaseInput.vue";
 import BaseSelect from "@/components/ui/BaseSelect.vue";
 import BaseQuill from "@/components/ui/BaseQuill.vue";
-import BaseSpinner from "@/components/ui/BaseSpinner.vue"
+import BaseSpinner from "@/components/ui/BaseSpinner.vue";
+import { mapMutations, mapActions, mapGetters } from "vuex";
 
 export default {
   components: {
@@ -96,10 +100,10 @@ export default {
     BaseInput,
     BaseSelect,
     BaseQuill,
-    BaseSpinner
+    BaseSpinner,
   },
   props: {
-    isEdit: { type: Boolean, require: false, default: false }
+    isEdit: { type: Boolean, require: false, default: false },
   },
   data() {
     return {
@@ -112,31 +116,40 @@ export default {
       },
       storyImageId: "",
       categoryList: [],
-      showSpinner: false
+      showSpinner: false,
     };
+  },
+  computed: {
+    ...mapGetters("story", ["getCategoryList", "getDetailStory"]),
   },
   async mounted() {
     this.categoryList = [];
-    await this.$store.dispatch("story/fetchCategoryList");
-    this.categoryList = this.$store.getters["story/getCategoryList"];
-    if ( this.isEdit ) {
-      const storyId = this.$route.params.id
-      await this.$store.dispatch("story/fetchDetailStory", storyId)
-      const detailStory = this.$store.getters["story/getDetailStory"]
-      this.storyData.title = detailStory.title
-      this.storyData.category = detailStory.categoryId.toString()
-      this.storyData.content = detailStory.content
-      this.storyData.coverImage = detailStory.story_image
-      this.storyImageId = detailStory.storyImageId
-
+    await this.fetchCategoryList();
+    this.categoryList = this.getCategoryList;
+    if (this.isEdit) {
+      const storyId = this.$route.params.id;
+      await this.fetchDetailStory(storyId);
+      const detailStory = this.getDetailStory;
+      this.storyData.title = detailStory.title;
+      this.storyData.category = detailStory.categoryId.toString();
+      this.storyData.content = detailStory.content;
+      this.storyData.coverImage = detailStory.story_image;
+      this.storyImageId = detailStory.storyImageId;
     }
   },
   methods: {
+    ...mapMutations(["setSuccessToast"]),
+    ...mapActions("story", [
+      "fetchCategoryList",
+      "fetchDetailStory",
+      "updateStory",
+      "createStory",
+    ]),
     async onImageSelected(e) {
       const file = e.files[0];
-      if ( file.size > 2097152 ) {
-        alert("Maximum file size is 2MB")
-        return
+      if (file.size > 2097152) {
+        alert("Maximum file size is 2MB");
+        return;
       }
       this.imageDetail = {
         type: e.files[0].type,
@@ -146,34 +159,44 @@ export default {
       reader.readAsDataURL(file);
       reader.addEventListener("load", () => {
         this.storyData.coverImage = reader.result;
-        this.storyData.imageFile = file
+        this.storyData.imageFile = file;
       });
     },
     cancelButton() {
-      this.$router.push("/user/story")
+      this.$router.push("/user/story");
     },
     async onSubmit() {
-      this.showSpinner = true
-      document.getElementById("storyButtonCancel").disabled = true
-      document.getElementById("storyButtonSave").disabled = true
-      if ( this.isEdit ) {
-        const storyId = this.$route.params.id
-        await this.$store.dispatch("story/updateStory", {storyData: this.storyData, storyId, imageId: this.storyImageId})
-        this.$router.push("/user/story")
-        this.$store.commit("setSuccessToast", {status: true, message: "Successfully edit story"})
+      this.showSpinner = true;
+      document.getElementById("storyButtonCancel").disabled = true;
+      document.getElementById("storyButtonSave").disabled = true;
+      if (this.isEdit) {
+        const storyId = this.$route.params.id;
+        await this.updateStory({
+          storyData: this.storyData,
+          storyId,
+          imageId: this.storyImageId,
+        });
+        this.$router.push("/user/story");
+        this.setSuccessToast({
+          status: true,
+          message: "Successfully edit story",
+        });
       } else {
-        await this.$store.dispatch("story/createStory", this.storyData)
-        this.$router.push("/user/story")
-        this.$store.commit("setSuccessToast", {status: true, message: "Successfully create story"})
+        await this.createStory(this.storyData);
+        this.$router.push("/user/story");
+        this.setSuccessToast({
+          status: true,
+          message: "Successfully create story",
+        });
       }
-      this.showSpinner = false
-      document.getElementById("storyButtonCancel").disabled = false
-      document.getElementById("storyButtonSave").disabled = false
+      this.showSpinner = false;
+      document.getElementById("storyButtonCancel").disabled = false;
+      document.getElementById("storyButtonSave").disabled = false;
     },
     closeImagePreview() {
-      this.storyData.coverImage = ""
-      this.storyData.imageFile = ""
-    }
+      this.storyData.coverImage = "";
+      this.storyData.imageFile = "";
+    },
   },
 };
 </script>
@@ -192,7 +215,7 @@ export default {
 }
 
 .image-review__remove-btn {
-  border-radius: 50%!important;
+  border-radius: 50% !important;
   position: absolute;
   height: 30px;
   width: 30px;

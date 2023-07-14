@@ -135,13 +135,13 @@
                 ></base-input>
               </ValidationProvider>
 
-                <base-input
-                  type="email"
-                  identity="email"
-                  label="Email"
-                  v-model="userData.email"
-                  :disabled="true"
-                ></base-input>
+              <base-input
+                type="email"
+                identity="email"
+                label="Email"
+                v-model="userData.email"
+                :disabled="true"
+              ></base-input>
 
               <base-text-area
                 identity="biodata"
@@ -185,6 +185,8 @@ import BaseSuccessToast from "~/components/ui/BaseSuccessToast.vue";
 import BaseErrorToast from "@/components/ui/BaseErrorToast.vue";
 import BaseSpinner from "@/components/ui/BaseSpinner.vue";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
+import { mapMutations, mapActions, mapGetters } from "vuex";
+
 export default {
   data() {
     return {
@@ -201,7 +203,7 @@ export default {
       showEditProfileSpinner: false,
       nameInputDisabled: false,
       biodataInputDisabled: false,
-      cropModal: null
+      cropModal: null,
     };
   },
   components: {
@@ -214,21 +216,30 @@ export default {
     BaseErrorToast,
     BaseSpinner,
   },
+  computed: {
+    ...mapGetters(["user/getUserData"]),
+  },
   mounted() {
-    this.cropModal = new bootstrap.Modal("#cropperModal")
+    this.cropModal = new bootstrap.Modal("#cropperModal");
     const { email, name, biodata, profile_picture, id } =
-      this.$store.getters["user/getUserData"];
+      this["user/getUserData"];
     this.profileImage = profile_picture
       ? `https://storytime-api.strapi.timedoor-js.web.id${profile_picture.url}`
       : "https://via.placeholder.com/150";
     this.userData = { email, name, biodata, id };
   },
   methods: {
+    ...mapMutations(["setErrorToast", "setSuccessToast"]),
+    ...mapActions([
+      "user/deleteUserImageProfile",
+      "user/postUserProfile",
+      "user/ediUserProfile",
+    ]),
     setImage(e) {
       const file = e.target.files[0];
       if (file.size > 2097152) {
         this.errorProfileImageSize = true;
-        this.$store.commit("setErrorToast", {
+        this.setErrorToast({
           status: true,
           message: "Maximum file size is 2MB",
         });
@@ -252,8 +263,8 @@ export default {
     },
     cropImage() {
       this.showCropSpinner = true;
-      document.getElementById("cropperCancel").disabled = true
-      document.getElementById("cropperChanges").disabled = true
+      document.getElementById("cropperCancel").disabled = true;
+      document.getElementById("cropperChanges").disabled = true;
 
       this.$refs.cropper.getCroppedCanvas().toBlob((blob) => {
         const form = new FormData();
@@ -263,54 +274,51 @@ export default {
         form.append("field", "profile_picture");
         this.updateProfilePicture(form);
       }, "image/*");
-      // this.cropImg = "";
     },
     async updateProfilePicture(form) {
-      let { profile_picture } = this.$store.getters["user/getUserData"];
+      let { profile_picture } = this["user/getUserData"];
       if (profile_picture) {
-        await this.$store.dispatch(
-          "user/deleteUserImageProfile",
-          profile_picture.id
-        );
-        await this.$store.dispatch("user/postUserProfile", form);
-        let user = this.$store.getters["user/getUserData"];
+        await this["user/deleteUserImageProfile"](profile_picture.id);
+        await this["user/postUserProfile"](form);
+        let user = this["user/getUserData"];
         this.profileImage = `https://storytime-api.strapi.timedoor-js.web.id${user.profile_picture.url}`;
       } else {
-        await this.$store.dispatch("user/postUserProfile", form);
+        await this["user/postUserProfile"](form);
       }
-      
+
       this.cropModal.hide();
-      
+
       this.cropImg = "";
       this.showCropSpinner = false;
-      document.getElementById("cropperCancel").disabled = false
-      document.getElementById("cropperChanges").disabled = false
+      document.getElementById("cropperCancel").disabled = false;
+      document.getElementById("cropperChanges").disabled = false;
 
       this.editAvatarToastShow = true;
-      this.$store.commit("setSuccessToast", {
+      this.setSuccessToast({
         status: true,
         message: "Successfully change avatar",
       });
     },
     async onProfileSubmit() {
-      this.showEditProfileSpinner = true
-      document.getElementById("editProfileCancel").disabled = true
-      document.getElementById("editProfileSave").disabled = true
-      this.biodataInputDisabled = true
-      this.nameInputDisabled = true
-      
-      await this.$store.dispatch("user/ediUserProfile", {
+      this.showEditProfileSpinner = true;
+      document.getElementById("editProfileCancel").disabled = true;
+      document.getElementById("editProfileSave").disabled = true;
+      this.biodataInputDisabled = true;
+      this.nameInputDisabled = true;
+
+      await this["user/ediUserProfile"]({
         biodata: this.userData.biodata,
         name: this.userData.name,
       });
-      this.isEditProfile = false;
-      this.showEditProfileSpinner = false
-      document.getElementById("editProfileCancel").disabled = false
-      document.getElementById("editProfileSave").disabled = false
-      this.biodataInputDisabled = false
-      this.nameInputDisabled = false
 
-      this.$store.commit("setSuccessToast", {
+      this.isEditProfile = false;
+      this.showEditProfileSpinner = false;
+      document.getElementById("editProfileCancel").disabled = false;
+      document.getElementById("editProfileSave").disabled = false;
+      this.biodataInputDisabled = false;
+      this.nameInputDisabled = false;
+
+      this.setSuccessToast({
         status: true,
         message: "Successfully update profile",
       });

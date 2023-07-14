@@ -102,6 +102,7 @@ import BaseErrorToast from "@/components/ui/BaseErrorToast.vue";
 import BaseSuccessToast from "@/components/ui/BaseSuccessToast.vue";
 import BaseSpinner from "@/components/ui/BaseSpinner.vue";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
+import { mapMutations, mapGetters, mapActions } from "vuex";
 
 export default {
   components: {
@@ -129,7 +130,12 @@ export default {
       confirmPasswordDisabled: false,
     };
   },
+  computed: {
+    ...mapGetters("user", ["getEditPasswordError"]),
+  },
   methods: {
+    ...mapMutations(["setSuccessToast", "setErrorToast"]),
+    ...mapActions("user", ["resetPassword", "setEditPasswordError"]),
     changeNewPasswordConfirmationStatus() {
       this.newPasswordConfirmationStatus = !this.newPasswordConfirmationStatus;
     },
@@ -145,7 +151,7 @@ export default {
       this.newPasswordDisabled = true;
       this.confirmPasswordDisabled = true;
 
-      await this.$store.dispatch("user/resetPassword", {
+      await this.resetPassword({
         currentPassword: this.oldPassword,
         newPassword: this.newPassword,
       });
@@ -160,25 +166,22 @@ export default {
       this.newPasswordDisabled = false;
       this.confirmPasswordDisabled = false;
 
-      this.erorrStatus = this.$store.getters["user/getEditPasswordError"];
+      this.erorrStatus = this.getEditPasswordError;
       if (this.erorrStatus.isError) {
-        this.$store.commit("setErrorToast", {
+        this.setErrorToast({
           status: true,
           message: this.erorrStatus.message,
         });
       } else {
-        this.$store.commit("setSuccessToast", {
+        this.setSuccessToast({
           status: true,
           message: "Successfully update new password",
         });
       }
     },
     closeToast() {
-      this.$store.commit("user/setEditPasswordError", {
-        isError: false,
-        message: "",
-      });
-      this.erorrStatus = this.$store.getters["user/getEditPasswordError"];
+      this.setEditPasswordError({ isError: false, message: "" });
+      this.erorrStatus = this.getEditPasswordError;
       this.showToast = false;
     },
     cancelEditPassword() {

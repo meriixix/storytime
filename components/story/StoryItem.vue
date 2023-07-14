@@ -60,6 +60,7 @@
 </template>
 
 <script>
+import { mapMutations, mapGetters } from "vuex";
 export default {
   props: {
     story: { type: Object, require: true },
@@ -69,7 +70,29 @@ export default {
       isBookmark: false,
     };
   },
+  computed: {
+    ...mapGetters("story", ["getBookmarkList"]),
+    ...mapGetters("auth", ["getToken"]),
+    bookmarkStatus() {
+      const bookmarkList = this.getBookmarkList;
+      if (bookmarkList) {
+        const storyId = this.story.id;
+        const result = bookmarkList.find((item) => item.id == storyId);
+        this.isBookmark = result ? true : false;
+        return result ? true : false;
+      } else {
+        this.isBookmark = false;
+        return false;
+      }
+    },
+  },
   methods: {
+    ...mapMutations(["setSuccessToast", "setErrorToast"]),
+    ...mapMutations("story", [
+      "setNewBookmark",
+      "setBookmark",
+      "deleteBookmark",
+    ]),
     getDate(arg) {
       const date = new Date(arg);
       const newDate = date.toDateString().split(" ");
@@ -82,12 +105,12 @@ export default {
         : "https://via.placeholder.com/150";
     },
     addBookmark(story) {
-      const token = this.$store.getters["auth/getToken"];
+      const token = this.getToken;
       if (!token) {
         this.$router.push("/login");
       } else {
         if (!story?.cover_image?.url) {
-          this.$store.commit("setErrorToast", {
+          this.setErrorToast({
             status: true,
             message: "An error has occurred",
           });
@@ -95,36 +118,22 @@ export default {
           return;
         }
         if (!this.isBookmark) {
-          this.$store.commit("story/setNewBookmark", story);
-          this.$store.commit("setSuccessToast", {
+          this.setNewBookmark(story);
+          this.setSuccessToast({
             status: true,
             message: "Successfully added story from bookmark",
           });
-          this.$store.commit("story/setBookmark");
           this.$emit("bookmarkClick");
         } else {
-          this.$store.commit("story/deleteBookmark", story.id);
-          this.$store.commit("setSuccessToast", {
+          this.deleteBookmark(story.id);
+          this.setSuccessToast({
             status: true,
             message: "Successfully removed story from bookmark",
           });
-          this.$store.commit("story/setBookmark");
+          this.setBookmark();
           this.$emit("bookmarkClick");
+          this.$emit("deleteBookmark");
         }
-      }
-    },
-  },
-  computed: {
-    bookmarkStatus() {
-      const bookmarkList = this.$store.getters["story/getBookmarkList"];
-      if (bookmarkList) {
-        const storyId = this.story.id;
-        const result = bookmarkList.find((item) => item.id == storyId);
-        this.isBookmark = result ? true : false;
-        return result ? true : false;
-      } else {
-        this.isBookmark = false;
-        return false;
       }
     },
   },

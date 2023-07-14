@@ -63,12 +63,15 @@
 </template>
 
 <script>
+import { mapMutations } from "vuex"
 export default {
   methods: {
+    ...mapMutations("auth", ["setToken"]),
+    ...mapMutations("story", ["getBookmark"]),
     logout() {
       localStorage.removeItem("storyTimeBookmark")
-      this.$store.commit("story/getBookmark")
-      this.$store.commit("auth/setToken", false);
+      this.getBookmark()
+      this.setToken(false);
       this.$router.push("/");
     },
   },

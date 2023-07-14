@@ -147,7 +147,7 @@
               type="button"
               class="btn btn-outline-secondary btn-delete shadow-none"
               data-bs-dismiss="modal"
-              @click="deleteStory"
+              @click="deleteButton"
             >
               Delete <base-spinner v-if="showSpinner"></base-spinner>
             </button>
@@ -163,12 +163,14 @@
 </template>
 
 <script>
-import BaseSpinner from "@/components/ui/BaseSpinner.vue"
-import BaseSuccessToast from "@/components/ui/BaseSuccessToast.vue"
+import BaseSpinner from "@/components/ui/BaseSpinner.vue";
+import BaseSuccessToast from "@/components/ui/BaseSuccessToast.vue";
+import { mapMutations, mapActions, mapGetters } from "vuex";
+
 export default {
   components: {
     BaseSpinner,
-    BaseSuccessToast
+    BaseSuccessToast,
   },
   data() {
     return {
@@ -179,10 +181,16 @@ export default {
       deleteModal: "",
       deleteStoryId: "",
       showSpinner: false,
-      deleteSuccessToast: false
+      deleteSuccessToast: false,
     };
   },
+  computed: {
+    ...mapGetters("story", ["getStories", "getPagination"]),
+    ...mapGetters("user", ["getUserData"]),
+  },
   methods: {
+    ...mapMutations(["setSuccessToast"]),
+    ...mapActions("story", ["fetchStoryList", "deleteStory"]),
     getDate(arg) {
       const date = new Date(arg);
       const newDate = date.toDateString().split(" ");
@@ -191,12 +199,12 @@ export default {
       return `${hour}:${minutes}, ${newDate[2]} ${newDate[1]} ${newDate[3]}`;
     },
     async pageClick(page) {
-      await this.$store.dispatch("story/fetchStoryList", {
+      await this.fetchStoryList({
         author: this.userId.id,
         page,
       });
-      const allData = this.$store.getters["story/getStories"];
-      this.pagination = this.$store.getters["story/getPagination"];
+      const allData = this.getStories;
+      this.pagination = this.getPagination;
       const storySelectedPage =
         this.pagination.total -
         (this.pagination.page - 1) * this.pagination.pageSize;
@@ -214,33 +222,33 @@ export default {
       this.deleteStoryId = id;
       this.deleteModal.show();
     },
-    async deleteStory() {
-      this.showSpinner = true
-      await this.$store.dispatch("story/deleteStory", this.deleteStoryId);
-      await this.$store.dispatch("story/fetchStoryList", {
+    async deleteButton() {
+      this.showSpinner = true;
+      await this.deleteStory(this.deleteStoryId);
+      await this.fetchStoryList({
         author: this.userId.id,
       });
-      this.storyList = this.$store.getters["story/getStories"];
-      this.pagination = this.$store.getters["story/getPagination"];
-      this.showSpinner = false
+      this.storyList = this.getStories;
+      this.pagination = this.getPagination;
+      this.showSpinner = false;
       this.deleteModal.hide();
-      this.$store.commit("setSuccessToast", {
+      this.setSuccessToast({
         status: true,
         message: "Successfully delete story",
       });
-      this.deleteSuccessToast = true
+      this.deleteSuccessToast = true;
     },
   },
   async mounted() {
     this.deleteModal = new bootstrap.Modal("#deleteModal");
     this.storyList = [];
-    this.userId = this.$store.getters["user/getUserData"];
-    await this.$store.dispatch("story/fetchStoryList", {
+    this.userId = this.getUserData;
+    await this.fetchStoryList({
       author: this.userId.id,
     });
-    this.storyList = this.$store.getters["story/getStories"];
+    this.storyList = this.getStories;
     this.isEmpty = this.storyList.length > 0 ? false : true;
-    this.pagination = this.$store.getters["story/getPagination"];
+    this.pagination = this.getPagination;
   },
   watch: {
     deleteSuccessToast(newValue) {
@@ -249,7 +257,7 @@ export default {
           this.deleteSuccessToast = false;
         }, 5000);
       }
-    }
+    },
   },
 };
 </script>

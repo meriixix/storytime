@@ -5,7 +5,7 @@
       v-for="story in stories"
       :key="story.id"
     >
-      <story-item :story="story" @bookmarkClick="showSuccessToast" @errorBookmark="showErrorToast"></story-item>
+      <story-item :story="story" @bookmarkClick="showSuccessToast" @errorBookmark="showErrorToast" @deleteBookmark="$emit('deleteBookmark')"></story-item>
     </div>
     <base-success-toast v-if="isSuccessToastShow"></base-success-toast>
     <base-error-toast v-if="isErrorToastShow"></base-error-toast>

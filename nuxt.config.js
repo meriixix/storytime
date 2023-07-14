@@ -52,6 +52,14 @@ export default {
     'cookie-universal-nuxt',
   ],
 
+  axios: {
+    baseURL: process.env.API_URL
+  },
+
+  publicRuntimeConfig: {
+    apiUrl: process.env.API_URL || "http://localhost:3000"
+  },
+
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     transpile: ["vee-validate/dist/rules"],

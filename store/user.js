@@ -30,7 +30,7 @@ export const mutations = {
 export const actions = {
     async postUserProfile({ rootGetters, commit }, payload) {
         try {
-            const data = await this.$axios.post('https://storytime-api.strapi.timedoor-js.web.id/api/upload', payload, {
+            const data = await this.$axios.post('/upload', payload, {
                 headers: {
                     "Authorization": `Bearer ${rootGetters["auth/getToken"]}`
                 }
@@ -43,7 +43,7 @@ export const actions = {
     },
     async ediUserProfile({ rootGetters }, payload) {
         try {
-            const data = await this.$axios.patch('https://storytime-api.strapi.timedoor-js.web.id/api/users/me', payload, {
+            const data = await this.$axios.patch('/users/me', payload, {
                 headers: {
                     "Authorization": `Bearer ${rootGetters["auth/getToken"]}`
                 }
@@ -54,7 +54,7 @@ export const actions = {
     },
     async getUserProfile({ commit }, payload) {
         try {
-            const { data } = await this.$axios.get('https://storytime-api.strapi.timedoor-js.web.id/api/users/me', {
+            const { data } = await this.$axios.get('/users/me', {
                 headers: {
                     'Authorization': `Bearer ${payload}`
                 }
@@ -66,7 +66,7 @@ export const actions = {
     },
     async deleteUserImageProfile({ rootGetters }, payload) {
         try {
-            const { data } = await this.$axios.delete(`https://storytime-api.strapi.timedoor-js.web.id/api/upload/files/${payload}`, {
+            const { data } = await this.$axios.delete(`/upload/files/${payload}`, {
                 headers: {
                     'Authorization': `Bearer ${rootGetters["auth/getToken"]}`
                 }
@@ -77,12 +77,11 @@ export const actions = {
     },
     async resetPassword({rootGetters, commit}, payload) {
         try {
-            const { data } = await this.$axios.post('https://storytime-api.strapi.timedoor-js.web.id/api/users/me/reset-password', payload, {
+            const { data } = await this.$axios.post('/users/me/reset-password', payload, {
                 headers: {
                     'Authorization': `Bearer ${rootGetters["auth/getToken"]}`
                 }
             })
-            // commit("setEditPasswordError", { isError: false, message: "Successfully update password" })
         } catch (error) {
             const response = error.response.data
             commit("setEditPasswordError", { isError: true, message: response.error.message })

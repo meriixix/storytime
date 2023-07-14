@@ -76,6 +76,8 @@
 
 <script>
 import BaseSuccessToast from "@/components/ui/BaseSuccessToast.vue";
+import { mapGetters, mapActions, mapMutations } from "vuex";
+
 export default {
   data() {
     return {
@@ -87,55 +89,11 @@ export default {
   components: {
     BaseSuccessToast,
   },
-  async fetch() {
-    await this.$store.dispatch("story/fetchDetailStory", this.$route.params.id);
-    this.story = this.$store.getters["story/getDetailStory"];
-  },
-  methods: {
-    getDate(arg) {
-      const date = new Date(arg);
-      const month = date.toLocaleDateString("default", { month: "long" });
-      const day = date.getDate();
-      const year = date.getFullYear();
-      return `${day} ${month} ${year}`;
-    },
-    addBookmark(story) {
-      const token = this.$store.getters["auth/getToken"];
-      if (!token) {
-        this.$router.push("/login");
-      } else {
-        if (!story.storyImageId) {
-          this.$store.commit("setErrorToast", {
-            status: true,
-            message: "An error has occurred",
-          });
-          this.$emit("errorBookmark");
-          return;
-        }
-        const storyForBookmark =
-          this.$store.getters["story/getStoryForBookmark"];
-        if (!this.isBookmark) {
-          this.$store.commit("story/setNewBookmark", storyForBookmark);
-          this.$store.commit("setSuccessToast", {
-            status: true,
-            message: "Successfully added story from bookmark",
-          });
-          this.$store.commit("story/setBookmark");
-        } else {
-          this.$store.commit("story/deleteBookmark", this.$route.params.id);
-          this.$store.commit("setSuccessToast", {
-            status: true,
-            message: "Successfully removed story from bookmark",
-          });
-          this.$store.commit("story/setBookmark");
-        }
-        this.isToastShow = true;
-      }
-    },
-  },
   computed: {
+    ...mapGetters("story", ["getStoryForBookmark", "getBookmarkList"]),
+    ...mapGetters("auth", ["getToken"]),
     bookmarkStatus() {
-      const bookmarkList = this.$store.getters["story/getBookmarkList"];
+      const bookmarkList = this.getBookmarkList;
       if (bookmarkList) {
         const storyId = this.$route.params.id;
         const result = bookmarkList.find((item) => item.id == storyId);
@@ -144,6 +102,58 @@ export default {
       } else {
         this.isBookmark = false;
         return false;
+      }
+    },
+  },
+  async fetch() {
+    await this.$store.dispatch("story/fetchDetailStory", this.$route.params.id);
+    this.story = this.$store.getters["story/getDetailStory"];
+  },
+  methods: {
+    ...mapMutations("story", [
+      "getStoryForBookmark",
+      "setNewBookmark",
+      "setBookmark",
+      "deleteBookmark",
+    ]),
+    ...mapMutations(["setSuccessToast", "setErrorToast"]),
+    getDate(arg) {
+      const date = new Date(arg);
+      const month = date.toLocaleDateString("default", { month: "long" });
+      const day = date.getDate();
+      const year = date.getFullYear();
+      return `${day} ${month} ${year}`;
+    },
+    addBookmark(story) {
+      const token = this.getToken;
+      if (!token) {
+        this.$router.push("/login");
+      } else {
+        if (!story.storyImageId) {
+          this.setErrorToast({
+            status: true,
+            message: "An error has occurred",
+          });
+          this.$emit("errorBookmark");
+          return;
+        }
+        const storyForBookmark = this.getStoryForBookmark;
+        if (!this.isBookmark) {
+          this.setNewBookmark(storyForBookmark);
+          this.setSuccessToast({
+            status: true,
+            message: "Successfully added story from bookmark",
+          });
+          this.setBookmark();
+        } else {
+          this.deleteBookmark(this.$route.params.id);
+          this.setSuccessToast({
+            status: true,
+            message: "Successfully removed story from bookmark",
+          });
+          this.setBookmark();
+        }
+        this.isToastShow = true;
       }
     },
   },

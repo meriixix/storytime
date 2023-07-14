@@ -16,25 +16,30 @@
 </template>
 
 <script>
+import { mapMutations, mapGetters } from "vuex";
 export default {
   data() {
     return {
       message: "",
     };
   },
+  computed: {
+    ...mapGetters(["getShowErrorToast"])
+  },
   methods: {
+    ...mapMutations(["setErrorToast"]),
     closeToast() {
       new bootstrap.Toast("#erorrToast").hide();
-      this.$store.commit("setErrorToast", { status: false, message: "" });
+      this.setErrorToast({ status: false, message: "" });
     },
   },
   mounted() {
-    const showToast = this.$store.getters.getShowErrorToast;
+    const showToast = this.getShowErrorToast;
     if (showToast.status) {
       this.message = showToast.message;
       new bootstrap.Toast("#erorrToast").show();
       setTimeout(() => {
-        this.$store.commit("setErrorToast", { status: false, message: "" });
+        this.setErrorToast({ status: false, message: "" });
         this.message = "";
       }, 5000);
     }

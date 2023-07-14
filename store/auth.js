@@ -32,7 +32,6 @@ export const mutations = {
         state.token = payload
     },
     setErrorMessage(state, payload) {
-        console.log(payload)
         state.errorMessage = payload
     }
 }
@@ -40,7 +39,7 @@ export const mutations = {
 export const actions = {
     async addUserData({ commit }, payload) {
         try {
-            await this.$axios.post('https://storytime-api.strapi.timedoor-js.web.id/api/auth/local/register', payload)
+            await this.$axios.post('/auth/local/register', payload)
             commit("setRegisterStatus", true)
         } catch (error) {
             const response = error.response.data
@@ -49,7 +48,7 @@ export const actions = {
     },
     async fetchUserLogin({ commit, dispatch }, payload) {
         try {
-            const { data } = await this.$axios.post('https://storytime-api.strapi.timedoor-js.web.id/api/auth/local', payload)
+            const { data } = await this.$axios.post('/auth/local', payload)
             const { jwt } = data.data
             commit("setToken", jwt)
             commit("setLoginStatus", true)

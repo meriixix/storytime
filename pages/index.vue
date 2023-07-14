@@ -57,7 +57,7 @@
           type="button"
           class="load-more btn btn-outline-dark rounded-0"
           @click="loadMore"
-          v-if="!pageStatus"
+          v-if="!pageStatus && storyList.length != 0"
         >
           Load More
         </button>
@@ -76,6 +76,8 @@
 
 <script>
 import StoryList from "@/components/story/StoryList.vue";
+import { mapGetters, mapActions } from "vuex";
+
 export default {
   components: {
     StoryList,
@@ -86,30 +88,32 @@ export default {
       sort: "newest",
     };
   },
+  computed: {
+    ...mapGetters("story", ["getPagination", "getStories"]),
+    pageStatus() {
+      const { total } = this.getPagination;
+      const stories = this.getStories;
+      return total == stories.length;
+    },
+    storyList() {
+      return this.getStories;
+    },
+  },
   methods: {
+    ...mapActions("story", ["fetchStoryList"]),
     loadMore() {
-      const { page } = this.$store.getters["story/getPagination"];
-      this.$store.dispatch("story/fetchStoryList", {
+      const { page } = this.getPagination;
+      this.fetchStoryList({
         page: page + 1,
         keyword: this.keyword,
         sort: this.sort,
       });
     },
     searchStory() {
-      this.$store.dispatch("story/fetchStoryList", {
+      this.fetchStoryList({
         keyword: this.keyword,
         sort: this.sort,
       });
-    },
-  },
-  computed: {
-    pageStatus() {
-      const { total } = this.$store.getters["story/getPagination"];
-      const stories = this.$store.getters["story/getStories"];
-      return total == stories.length;
-    },
-    storyList() {
-      return this.$store.getters["story/getStories"];
     },
   },
   async fetch() {
